@@ -1,4 +1,6 @@
--- NandoX HUB - Universal Script Loader
+-- NandoX HUB - Universal Script Loader com Rayfield UI
+local Rayfield = loadstring(game:HttpGet('https://raw.githubusercontent.com/shlexware/Rayfield/main/source'))()
+
 local games = {
     ["Prison Life"] = {
         {"Keyboard Mobile", "https://raw.githubusercontent.com/advxzivhsjjdhxhsidifvsh/mobkeyboard/main/main.txt"},
@@ -50,17 +52,58 @@ local games = {
     },
 }
 
-local lib = loadstring(game:HttpGet("https://raw.githubusercontent.com/violin-suzutsuki/LinoriaLib/main/Library.lua"))()
-local win = lib:CreateWindow({Title = "🎮 NandoX HUB Universal", Center = true, AutoShow = true})
-local tabs = {}
+local Window = Rayfield:CreateWindow({
+    Name = "🎮 NandoX HUB Universal",
+    LoadingTitle = "NandoX HUB",
+    LoadingSubtitle = "Carregando Scripts...",
+    ConfigurationSaving = {
+        Enabled = true,
+        FolderName = "NandoXHubRayfield", -- pasta para configs
+        FileName = "UserConfig",
+    },
+    Discord = {
+        Enabled = false,
+    },
+    KeySystem = false, -- sem key
+})
 
 for gameName, scripts in pairs(games) do
-    local tab = win:AddTab(gameName)
-    tabs[gameName] = tab
+    local Tab = Window:CreateTab(gameName, nil)
     for _, data in ipairs(scripts) do
         local name, url = unpack(data)
-        tab:AddButton({text = name, callback = function() loadstring(game:HttpGet(url))() end})
+        Tab:CreateButton({
+            Name = name,
+            Callback = function()
+                Rayfield:Notify({
+                    Title = "NandoX HUB",
+                    Content = "Executando script: "..name,
+                    Duration = 3,
+                    Image = 4483362458,
+                    Actions = { -- ações extras (botões)
+                        Ignore = {
+                            Name = "OK",
+                            Callback = function() end
+                        }
+                    },
+                })
+                local success, err = pcall(function()
+                    loadstring(game:HttpGet(url))()
+                end)
+                if not success then
+                    Rayfield:Notify({
+                        Title = "Erro ao executar",
+                        Content = err,
+                        Duration = 5,
+                        Image = 4483362458,
+                        Actions = {
+                            Ignore = {
+                                Name = "OK",
+                                Callback = function() end
+                            }
+                        },
+                    })
+                end
+            end,
+        })
     end
 end
-
-lib:Notify("NandoX HUB carregado com sucesso!", 5)
